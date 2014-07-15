@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Prevencontrol</title>
+</head>
+<body>
+	<form id='formulario' method=post action="">{% csrf_token %}
+		<h5>Registre d'Entrades/Sortides y Despenses</h5>
+		<table>
+			{{ formulario.as_table }}
+		</table>
+		<p><input type=submit value="Entrar"></p>
+	</form>
+</body>
+</html>

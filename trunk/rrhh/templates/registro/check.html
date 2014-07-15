@@ -1,0 +1,173 @@
+<!DOCTYPE HTML>
+<html>
+<head>
+	<title>Prevencontrol</title>
+</head>
+<body>
+
+<script type="text/javascript" src="http://maps.google.com/maps/api/js?sensor=false"></script>
+
+<article>
+	<p>La seva situació i la seva imatge: <span id="status"></span></p>
+</article>
+
+<script>
+function success(position) {
+  var mapcanvas = document.createElement('div');
+  mapcanvas.id = 'mapcanvas';
+  mapcanvas.style.height = '200px';
+  mapcanvas.style.width = '280px';
+  var x = document.getElementById("lat");
+  var y = document.getElementById("lng");
+    
+  document.querySelector('article').appendChild(mapcanvas);
+  
+  var latlng = new google.maps.LatLng(position.coords.latitude, position.coords.longitude);
+  x.value = position.coords.latitude;
+  y.value = position.coords.longitude;
+  
+  //var lat = latlng[0];
+  //var lng = latlng[1];
+  //var lat = position.coords.latitude;
+  //var lng = position.coords.longitude;
+  //document.getElementById('lat').value = lat;
+  //document.getElementById('lng').value = lng;
+  myOptions = {
+    zoom: 15,
+    center: latlng,
+    mapTypeControl: false,
+    navigationControlOptions: {style: google.maps.NavigationControlStyle.SMALL},
+    mapTypeId: google.maps.MapTypeId.ROADMAP
+  };
+  map = new google.maps.Map(document.getElementById("mapcanvas"), myOptions);
+  
+  var marker = new google.maps.Marker({
+      position: latlng, 
+      map: map, 
+      title:"Vostè està aquí! (almenys dins d'un "+position.coords.accuracy+" metres de ràdio)"
+  });
+}
+
+function error(msg) {
+  var s = document.querySelector('#status');
+  s.innerHTML = typeof msg == 'string' ? msg : "error";
+  s.className = 'fail';
+}
+
+var lat, lng, map, myOptions;
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(success, error);
+} else {
+  error('not supported');
+}
+</script>
+
+<br>
+<video id="video"></video>
+<br>
+<button id="startbutton">Capturar Imatge</button>
+
+<form id='formulario2' method=post action="" enctype="multipart/form-data">{% csrf_token %}
+
+	<!--<input id="img" name="img" type="file" accept="image/*" hidden>
+	</form>
+	<input id="photo" name="photo" src="" type="image" style="display:none">
+	<input src="" id="photo" name="photo" type="file" accept="image/*" style="display:none">
+	<img src="" id="photo" name="photo">-->
+	<!--<table>
+		{{ formulario2.as_table }}
+	</table>
+	<p>{{ formulario2.usuari }}</p>
+	<p>{{ formulario2.contrasenya }}</p>
+	<p>{{ formulario2.lat }}</p>
+	<p>{{ formulario2.lng }}</p>
+	<p>{{ formulario2.foto }}</p>
+	<p>{{ formulario2.hora }}</p>
+	<input id="checkbutton" name="checkbutton" type=submit value="Capturar Imatge y Registrar entrada/sortida">-->
+	<input id="checkbutton" name="checkbutton" type=submit value="Registrar entrada/sortida">
+	<br>
+	<canvas id="canvas"></canvas>
+	<img src="" id="photo" name="photo">
+	<br>
+	<input id="lat" name="lat" type="text" value="" style="display:none">
+	<input id="lng" name="lng" type="text" value="" style="display:none">
+	<!-- <div id="latitude"></div>
+	<br>
+	<div id="longitude"></div> -->
+	<!--<input id="foto" name="foto" type=text style="display:none">-->
+	
+	<!--<input id="usuari" name="usuari" type=text>
+	<input id="contrasenya" name="contrasenya" type=text>
+	<input id="hora" name="hora" type=text>-->
+</form>
+
+
+<script type="text/javascript">
+(function() {
+	 
+	  var streaming = false,
+	      video        = document.querySelector('#video'),
+	      cover        = document.querySelector('#cover'),
+	      canvas       = document.querySelector('#canvas'),
+	      photo        = document.querySelector('#photo'),
+	      foto        = document.querySelector('#foto'),
+	      startbutton  = document.querySelector('#startbutton'),
+	      //checkbutton  = document.querySelector('#checkbutton'),
+	      width = 280,
+	      height = 0;
+	 
+	  navigator.getMedia = ( navigator.getUserMedia ||
+	                         navigator.webkitGetUserMedia ||
+	                         navigator.mozGetUserMedia ||
+	                         navigator.msGetUserMedia);
+	 
+	  navigator.getMedia(
+	    {
+	      video: true,
+	      audio: false
+	    },
+	    function(stream) {
+	      if (navigator.mozGetUserMedia) {
+	        video.mozSrcObject = stream;
+	      } else {
+	        var vendorURL = window.URL || window.webkitURL;
+	        video.src = vendorURL.createObjectURL(stream);
+	      }
+	      video.play();
+	    },
+	    function(err) {
+	      console.log("An error occured! " + err);
+	    }
+	  );
+	 
+	  video.addEventListener('canplay', function(ev){
+	    if (!streaming) {
+	      height = video.videoHeight / (video.videoWidth/width);
+	      video.setAttribute('width', width);
+	      video.setAttribute('height', height);
+	      canvas.setAttribute('width', width);
+	      canvas.setAttribute('height', height);
+	      streaming = true;
+	    }
+	  }, false);
+	 
+	  function takepicture() {
+	    canvas.width = width;
+	    canvas.height = height;
+	    canvas.getContext('2d').drawImage(video, 0, 0, width, height);
+	    var data = canvas.toDataURL('image/png');
+	    foto.value = data
+	    photo.setAttribute('src', data);
+	  }
+	 
+	  //checkbutton.addEventListener('click', function(ev){
+	  startbutton.addEventListener('click', function(ev){
+	      takepicture();
+	    ev.preventDefault();
+	  }, false);
+	  
+	})();
+</script>
+
+</body>
+</html>
